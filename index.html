@@ -13,6 +13,8 @@
       <section class="card">
         <h3>Задание 1: Валидация входа</h3>
         <div class="form-group">
+          <label for="user-email">Введите e-mail:</label>
+          <input type="email" id="user-email" name="user-email" placeholder="example@mail.com" required/>
           <input type="text" id="ageInput" placeholder="Ваш возраст" />
           <input
             type="password"
@@ -52,7 +54,7 @@
       <!-- Задание 4: Квиз -->
       <section class="card">
         <h3>Задание 4: Интерактивный квиз</h3>
-        <button onclick="startQuiz()">Запустить квиз (prompt)</button>
+        <button onclick="startQuiz()">Начать квиз (prompt)</button>
         <p id="quizResult" class="result"></p>
       </section>
     </div>
