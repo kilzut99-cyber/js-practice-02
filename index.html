@@ -12,8 +12,15 @@
       <!-- Задание 1: Валидатор -->
       <section class="card">
         <h3>Задание 1: Валидация входа</h3>
-        <div class="form-group"> <!--Исправлено с form-groHTMLup на form-group-->
-          <input type="email" id="user-email" name="user-email" placeholder="example@mail.com" required/>
+        <div class="form-group">
+          <!--Исправлено с form-groHTMLup на form-group-->
+          <input
+            type="email"
+            id="user-email"
+            name="user-email"
+            placeholder="example@mail.com"
+            required
+          />
           <input type="text" id="ageInput" placeholder="Ваш возраст" />
           <input
             type="password"
@@ -53,7 +60,8 @@
       <!-- Задание 4: Квиз -->
       <section class="card">
         <h3>Задание 4: Интерактивный квиз</h3>
-        <div class="form-group"> <!-- Добавляем этот контейнер для кнопки-->
+        <div class="form-group">
+          <!-- Добавляем этот контейнер для кнопки-->
           <button onclick="startQuiz()">Начать квиз</button>
         </div>
         <p id="quizResult" class="result"></p>
