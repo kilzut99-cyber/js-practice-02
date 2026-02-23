@@ -3,23 +3,29 @@ const RATE_USD = 3.00;
 const RATE_EUR = 3.4;
 const RATE_RUB = 0.035;
 
-// Вспомогательная функция для форматирования в десятичную степень
-function formatToPower(num) {
-  if (num === 0) return "0";
-  // Преобразуем в экспоненциальный вид, например "1.23e+5"
-  const exp = num.toExponential(2); 
-  const [mantissa, exponent] = exp.split('e');
-  // Убираем плюс из степени и преобразуем в красивый вид 1.23 * 10^5
-  return `${mantissa} · 10<sup>${parseInt(exponent)}</sup>`;
+// Вспомогательная функция для умного форматирования чисел
+function smartFormat(num) {
+  // Если число больше или равно 100 миллиардам — выводим в степенях
+  if (Math.abs(num) >= 100000000000) {
+    const exp = num.toExponential(2);
+    const [mantissa, exponent] = exp.split('e');
+    return `${mantissa} · 10<sup>${parseInt(exponent)}</sup>`;
+  }
+  
+  // В обычном случае выводим с разделением разрядов и запятой (плавающая точка)
+  return new Intl.NumberFormat("ru-RU", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(num);
 }
 
 // ЗАДАНИЕ 1: Валидация
 function checkLogin() {
   const email = document.getElementById("user-email").value;
-  const ageInput = document.getElementById("ageInput").value;
+  const ageVal = document.getElementById("ageInput").value;
   const pass = document.getElementById("passInput").value;
   const res = document.getElementById("loginResult");
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Проверка @ и точки
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   res.style.color = "#e74c3c";
 
@@ -27,13 +33,11 @@ function checkLogin() {
     res.textContent = "Ошибка: Некорректный Email (нужна @ и точка)";
     return;
   }
-
-  const age = Number(ageInput);
-  if (ageInput.trim() === "" || Number.isNaN(age) || age < 18) {
+  const age = Number(ageVal);
+  if (ageVal.trim() === "" || Number.isNaN(age) || age < 18) {
     res.textContent = "Ошибка: Возраст должен быть числом >= 18";
     return;
   }
-
   if (pass.length < 6) {
     res.textContent = "Ошибка: Пароль мин. 6 символов";
     return;
@@ -43,14 +47,14 @@ function checkLogin() {
   res.innerHTML = "✅ Доступ разрешён";
 }
 
-// ЗАДАНИЕ 2: Скидки (проверка < 0.01)
+// ЗАДАНИЕ 2: Скидки
 function calculateDiscount() {
-  const sumInput = document.getElementById("sumInput");
+  const input = document.getElementById("sumInput");
   const res = document.getElementById("discountResult");
-  const sum = Number(sumInput.value);
+  const sum = Number(input.value);
 
-  // Ошибка если пусто, NaN или меньше 0.01 (включая 0.00001 и отрицательные)
-  if (sumInput.value.trim() === "" || Number.isNaN(sum) || sum < 0.01) {
+  // Проверка: пусто, NaN или меньше 0.01 (включая 0.0001 и отрицательные)
+  if (input.value.trim() === "" || Number.isNaN(sum) || sum < 0.01) {
     res.style.color = "#e74c3c";
     res.textContent = "Ошибка: введите сумму от 0.01";
     return;
@@ -61,19 +65,20 @@ function calculateDiscount() {
   const delivery = finalSum > 200 ? "Доставка бесплатная" : "Доставка платная";
 
   res.style.color = "#27ae60";
-  res.textContent = `К оплате: ${finalSum.toFixed(2)} BYN (скидка ${discount}%). ${delivery}.`;
+  res.innerHTML = `К оплате: ${smartFormat(finalSum)} BYN (скидка ${discount}%). ${delivery}.`;
 }
 
-// ЗАДАНИЕ 3: Конвертер (Десятичные степени + Зеленый цвет)
+// ЗАДАНИЕ 3: Конвертер (с порогом для степеней)
 function convertCurrency() {
-  const amountInput = document.getElementById("amountInput").value;
+  const input = document.getElementById("amountInput");
   const currency = document.getElementById("currencySelect").value;
   const res = document.getElementById("convertResult");
-  const amount = Number(amountInput);
+  const amount = Number(input.value);
 
-  if (amountInput.trim() === "" || Number.isNaN(amount) || amount <= 0) {
+  // Такая же проверка на дробные числа < 0.01 и отрицательные
+  if (input.value.trim() === "" || Number.isNaN(amount) || amount < 0.01) {
     res.style.color = "#e74c3c";
-    res.textContent = "Введите сумму больше 0";
+    res.textContent = "Ошибка: введите сумму от 0.01";
     return;
   }
 
@@ -84,26 +89,34 @@ function convertCurrency() {
     case "RUB": result = amount / RATE_RUB; break;
   }
 
-  res.style.color = "#27ae60"; // Зеленый цвет результата
-  // Используем innerHTML для отображения тега <sup> (степени)
-  res.innerHTML = `${formatToPower(amount)} BYN = ${formatToPower(result)} ${currency}`;
+  res.style.color = "#27ae60";
+  // Используем smartFormat для вывода обычного числа или степени
+  res.innerHTML = `${smartFormat(amount)} BYN = ${smartFormat(result)} ${currency}`;
 }
 
 // ЗАДАНИЕ 4: Квиз
 function startQuiz() {
   const res = document.getElementById("quizResult");
   let score = 0;
+  const check = (val) => {
+    if (val === null) {
+      res.style.color = "#e74c3c";
+      res.textContent = "Квиз отменён";
+      return true;
+    }
+    return false;
+  };
 
-  const q1 = prompt("Вопрос 1: Разница между == и === существует? (да/нет)");
-  if (q1 === null) return (res.style.color = "#e74c3c", res.textContent = "Квиз отменён");
+  let q1 = prompt("Вопрос 1: Разница между == и === существует? (да/нет)");
+  if (check(q1)) return;
   if (q1.toLowerCase() === "да") score++;
 
-  const q2 = prompt("Вопрос 2: Можно ли менять const? (да/нет)");
-  if (q2 === null) return (res.style.color = "#e74c3c", res.textContent = "Квиз отменён");
+  let q2 = prompt("Вопрос 2: Можно ли менять const? (да/нет)");
+  if (check(q2)) return;
   if (q2.toLowerCase() === "нет") score++;
 
-  const q3 = prompt("Вопрос 3: Number('abc') это NaN? (да/нет)");
-  if (q3 === null) return (res.style.color = "#e74c3c", res.textContent = "Квиз отменён");
+  let q3 = prompt("Вопрос 3: Number('abc') это NaN? (да/нет)");
+  if (check(q3)) return;
   if (q3.toLowerCase() === "да") score++;
 
   res.style.color = "#27ae60";
